@@ -1,5 +1,19 @@
 <script>
 // =========================
+// GLOBAL STATE
+// =========================
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+// =========================
+// MOUSE TRACKING
+// =========================
+document.addEventListener("mousemove", (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+// =========================
 // BLINK SYSTEM
 // =========================
 const HALF = 30;
@@ -10,12 +24,12 @@ function blink() {
   let frame = 0;
 
   const ids = [
-    { top: 'lidLtop', bot: 'lidLbot' },
-    { top: 'lidRtop', bot: 'lidRbot' }
+    { top: "lidLtop", bot: "lidLbot" },
+    { top: "lidRtop", bot: "lidRbot" }
   ];
 
   function ease(t) {
-    return t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
   const close = setInterval(() => {
@@ -23,14 +37,14 @@ function blink() {
     const t = ease(frame / steps);
     const h = t * HALF;
 
-    ids.forEach(e => {
+    ids.forEach((e) => {
       const tl = document.getElementById(e.top);
       const bl = document.getElementById(e.bot);
       if (!tl || !bl) return;
 
-      tl.setAttribute('height', h);
-      bl.setAttribute('y', 116 - h);
-      bl.setAttribute('height', h);
+      tl.setAttribute("height", h);
+      bl.setAttribute("y", 116 - h);
+      bl.setAttribute("height", h);
     });
 
     if (frame >= steps) {
@@ -42,14 +56,14 @@ function blink() {
         const t = ease(1 - frame / steps);
         const h = t * HALF;
 
-        ids.forEach(e => {
+        ids.forEach((e) => {
           const tl = document.getElementById(e.top);
           const bl = document.getElementById(e.bot);
           if (!tl || !bl) return;
 
-          tl.setAttribute('height', h);
-          bl.setAttribute('y', 116 - h);
-          bl.setAttribute('height', h);
+          tl.setAttribute("height", h);
+          bl.setAttribute("y", 116 - h);
+          bl.setAttribute("height", h);
         });
 
         if (frame >= steps) {
@@ -63,37 +77,37 @@ function blink() {
 
 setTimeout(blink, 1800);
 
-
 // =========================
-// ICONS
+// ICON LAYER (simple + safe)
 // =========================
-const layer = document.getElementById('icon-layer');
+const iconLayer = document.getElementById("icon-layer");
 
 function initIcons() {
-  layer.innerHTML = '';
+  if (!iconLayer) return;
 
-  const icons = ["🔒","⚡","🛡️","⏱️","⚠️","📁"];
+  iconLayer.innerHTML = "";
+
+  const icons = ["🔒", "⚡", "🛡️", "⏱️", "📡", "📁"];
 
   icons.forEach((ic, i) => {
-    const el = document.createElement('div');
-    el.className = 'ficon';
-    el.innerText = ic;
+    const el = document.createElement("div");
+    el.className = "ficon";
+    el.textContent = ic;
 
-    el.style.left = (10 + i * 15) + '%';
-    el.style.top = (40 + Math.sin(i) * 10) + '%';
+    el.style.left = (10 + i * 15) + "%";
+    el.style.top = (35 + Math.sin(i) * 10) + "%";
 
-    layer.appendChild(el);
+    iconLayer.appendChild(el);
   });
 }
 
 initIcons();
 
-
 // =========================
-// OPTIONAL CANVAS (simple)
+// CANVAS PARTICLES (clean)
 // =========================
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
 
 let W, H, pts = [];
 
@@ -101,18 +115,18 @@ function resize() {
   W = canvas.width = window.innerWidth;
   H = canvas.height = window.innerHeight;
 
-  pts = Array.from({length: 35}, () => ({
+  pts = Array.from({ length: 35 }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
-    vx: (Math.random() - 0.5) * 0.3,
-    vy: (Math.random() - 0.5) * 0.3
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25
   }));
 }
 
 function draw() {
-  ctx.clearRect(0,0,W,H);
+  ctx.clearRect(0, 0, W, H);
 
-  pts.forEach(p => {
+  pts.forEach((p) => {
     p.x += p.vx;
     p.y += p.vy;
 
@@ -121,9 +135,9 @@ function draw() {
     if (p.y < 0) p.y = H;
     if (p.y > H) p.y = 0;
 
-    ctx.fillStyle = "rgba(0,200,255,.15)";
     ctx.beginPath();
     ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,200,255,0.15)";
     ctx.fill();
   });
 
@@ -131,29 +145,127 @@ function draw() {
 }
 
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener("resize", resize);
 draw();
 
-  .cleo-name{
-  font-size: 10px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
+// =========================
+// CLEO ELEMENTS
+// =========================
+const cleoInner = document.getElementById("cleoInner");
+const svgWrap = cleoInner.querySelector(".cleo-svg-wrap");
 
-  color: rgba(255,255,255,.9); /* FIX: was too faint */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+// eyes (must exist in SVG)
+const eyeL = document.getElementById("eyeLeft");
+const eyeR = document.getElementById("eyeRight");
 
-  position: relative;
-  z-index: 10000;
+// status box
+const statusText = document.getElementById("cleoStatusText");
+
+let hover = false;
+let leanX = 0;
+let leanY = 0;
+let glowPhase = 0;
+
+// messages
+const messages = [
+  "SYSTEM READY",
+  "SCANNING USER...",
+  "CONNECTION STABLE",
+  "COMPLIANCE ACTIVE",
+  "LIFECYCLE TRACKING ON",
+  "INPUT MONITORING ENABLED"
+];
+
+let msgIndex = 0;
+
+// hover events
+cleoInner.addEventListener("mouseenter", () => {
+  hover = true;
+
+  msgIndex = (msgIndex + 1) % messages.length;
+  typeMessage(messages[msgIndex]);
+});
+
+cleoInner.addEventListener("mouseleave", () => {
+  hover = false;
+  typeMessage("SYSTEM READY");
+});
+
+// typing effect
+let typing;
+
+function typeMessage(text) {
+  clearInterval(typing);
+  let i = 0;
+  statusText.textContent = "";
+
+  typing = setInterval(() => {
+    statusText.textContent += text[i];
+    i++;
+    if (i >= text.length) clearInterval(typing);
+  }, 30);
 }
 
-.cleo-name span{
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: clamp(11px, 1vw, 14px);
-  letter-spacing: .1em;
-  color: #00dcff;
+// =========================
+// MAIN CLEO LOOP
+// =========================
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
+
+function cleoLoop() {
+  const rect = cleoInner.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const dx = mouseX - cx;
+  const dy = mouseY - cy;
+
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  const nx = dx / dist;
+  const ny = dy / dist;
+
+  // =========================
+  // EYES
+  // =========================
+  const eyeStrength = hover ? 4 : 1.5;
+
+  if (eyeL && eyeR) {
+    const ex = nx * eyeStrength;
+    const ey = ny * eyeStrength;
+
+    eyeL.setAttribute("transform", `translate(${ex},${ey})`);
+    eyeR.setAttribute("transform", `translate(${ex},${ey})`);
+  }
+
+  // =========================
+  // LEAN
+  // =========================
+  const tx = hover ? nx * 6 : 0;
+  const ty = hover ? ny * 4 : 0;
+
+  leanX = lerp(leanX, tx, 0.08);
+  leanY = lerp(leanY, ty, 0.08);
+
+  cleoInner.style.transform =
+    `translate(${leanX}px,${leanY}px) scale(${hover ? 1.04 : 1})`;
+
+  // =========================
+  // GLOW
+  // =========================
+  if (hover) glowPhase += 0.08;
+  else glowPhase *= 0.9;
+
+  const pulse = (Math.sin(glowPhase) + 1) / 2;
+  const glow = 0.3 + pulse * 0.5;
+
+  if (svgWrap) {
+    svgWrap.style.filter =
+      `drop-shadow(0 12px 32px rgba(0,220,255,${glow}))`;
+  }
+
+  requestAnimationFrame(cleoLoop);
+}
+
+cleoLoop();
 </script>
