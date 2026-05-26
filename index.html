@@ -123,9 +123,9 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
   animation:fadeUp .8s .4s both;
   width:100%;
 }
-.tag-left{font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,.3);font-weight:300;letter-spacing:.04em;white-space:nowrap;}
+.tag-left{font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,.55);font-weight:300;letter-spacing:.04em;white-space:nowrap;}
 .tag-left strong{color:rgba(0,220,255,.7);font-weight:400}
-.tag-right{font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,.3);font-weight:300;letter-spacing:.04em;white-space:nowrap;}
+.tag-right{font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,.55);font-weight:300;letter-spacing:.04em;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -142,27 +142,27 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
         <div class="cleo-svg-wrap">
           <svg viewBox="0 0 220 280" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%">
             <defs>
-              <!-- 3D blue body -->
+              <!-- body: light grey-white with soft blue tint -->
               <radialGradient id="bG" cx="38%" cy="28%" r="68%">
-                <stop offset="0%" stop-color="#7ee8ff"/>
-                <stop offset="50%" stop-color="#2a9fe8"/>
-                <stop offset="100%" stop-color="#0d5aaa"/>
+                <stop offset="0%" stop-color="#eef8ff"/>
+                <stop offset="50%" stop-color="#cce8f8"/>
+                <stop offset="100%" stop-color="#90c8e8"/>
               </radialGradient>
               <!-- face skin -->
               <radialGradient id="fG" cx="42%" cy="35%" r="60%">
                 <stop offset="0%" stop-color="#ffe0c8"/>
                 <stop offset="100%" stop-color="#f0b890"/>
               </radialGradient>
-              <!-- helmet -->
+              <!-- helmet: matching light white-blue -->
               <radialGradient id="hG" cx="36%" cy="26%" r="68%">
-                <stop offset="0%" stop-color="#90e8ff"/>
-                <stop offset="55%" stop-color="#1e88e0"/>
-                <stop offset="100%" stop-color="#0840a0"/>
+                <stop offset="0%" stop-color="#f0faff"/>
+                <stop offset="45%" stop-color="#b8e0f8"/>
+                <stop offset="100%" stop-color="#70b8e0"/>
               </radialGradient>
-              <!-- visor (dark glass) -->
+              <!-- visor -->
               <radialGradient id="vG" cx="35%" cy="28%" r="65%">
-                <stop offset="0%" stop-color="#50b8ff"/>
-                <stop offset="50%" stop-color="#0848c8"/>
+                <stop offset="0%" stop-color="#80c8ff"/>
+                <stop offset="50%" stop-color="#1060c8"/>
                 <stop offset="100%" stop-color="#020e28"/>
               </radialGradient>
               <!-- eye glow -->
@@ -405,7 +405,7 @@ function moveCleo() {
 moveCleo();
 
 // Fixed positions [xRatio along wordmark, yOffset from CLEO centre]
-const fixedPos=[[0.07,20],[0.18,55],[0.30,35],[0.70,30],[0.82,55],[0.93,22]];
+const fixedPos=[[0.07,10],[0.18,45],[0.30,25],[0.70,20],[0.82,45],[0.93,12]];
 
 function initParticles(){
   layer.innerHTML=''; particles=[];
