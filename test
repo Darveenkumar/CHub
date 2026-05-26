@@ -1,0 +1,229 @@
+<script>
+// =========================
+// BLINK SYSTEM (unchanged)
+// =========================
+const HALF = 30;
+
+function blink() {
+  const duration = 120;
+  const steps = 12;
+  let frame = 0;
+
+  const ids = [
+    { top: 'lidLtop', bot: 'lidLbot' },
+    { top: 'lidRtop', bot: 'lidRbot' },
+  ];
+
+  function ease(t) {
+    return t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
+  }
+
+  const closeInt = setInterval(() => {
+    frame++;
+    const t = ease(frame / steps);
+    const h = t * HALF;
+
+    ids.forEach(e => {
+      const tl = document.getElementById(e.top);
+      const bl = document.getElementById(e.bot);
+      if (!tl || !bl) return;
+
+      tl.setAttribute('height', h);
+      bl.setAttribute('y', 116 - h);
+      bl.setAttribute('height', h);
+    });
+
+    if (frame >= steps) {
+      clearInterval(closeInt);
+      frame = 0;
+
+      const openInt = setInterval(() => {
+        frame++;
+        const t = ease(1 - frame / steps);
+        const h = t * HALF;
+
+        ids.forEach(e => {
+          const tl = document.getElementById(e.top);
+          const bl = document.getElementById(e.bot);
+          if (!tl || !bl) return;
+
+          tl.setAttribute('height', h);
+          bl.setAttribute('y', 116 - h);
+          bl.setAttribute('height', h);
+        });
+
+        if (frame >= steps) {
+          clearInterval(openInt);
+          setTimeout(blink, 2400 + Math.random() * 3200);
+        }
+      }, duration / steps);
+    }
+  }, duration / steps);
+}
+
+setTimeout(blink, 1800);
+
+
+// =========================
+// ICON SYSTEM (unchanged)
+// =========================
+const iconDefs = [
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#00dcff" stroke-width="1.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>` },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#4dffa0" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>` },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#7b8cff" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>` },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#f0c060" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>` },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.5"><path d="M10.29 3.86L1.82 18h16.36z"/></svg>` },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.5"><rect x="2" y="3" width="20" height="14"/></svg>` },
+];
+
+const layer = document.getElementById('icon-layer');
+const SIZE = 32;
+let particles = [];
+
+function initParticles() {
+  layer.innerHTML = '';
+  particles = [];
+
+  iconDefs.forEach((def, i) => {
+    const el = document.createElement('div');
+    el.className = 'ficon';
+    el.innerHTML = def.svg;
+
+    const x = window.innerWidth * (0.1 + i * 0.15);
+    const y = window.innerHeight * 0.4;
+
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+
+    layer.appendChild(el);
+
+    particles.push({ el, x, y, ox:x, oy:y, vx:0, vy:0 });
+  });
+}
+
+initParticles();
+window.addEventListener('resize', initParticles);
+
+
+// =========================
+// CLEO INTERACTION (NEW)
+// =========================
+const cleoInner = document.getElementById('cleoInner');
+const svgWrap = cleoInner.querySelector('.cleo-svg-wrap');
+
+const eyeL = document.getElementById('eyeLeft');
+const eyeR = document.getElementById('eyeRight');
+
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+let hover = false;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+cleoInner.addEventListener('mouseenter', () => hover = true);
+cleoInner.addEventListener('mouseleave', () => hover = false);
+
+let glowPhase = 0;
+let leanX = 0;
+let leanY = 0;
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+function cleoLoop(){
+  const rect = cleoInner.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+
+  const dx = mouseX - cx;
+  const dy = mouseY - cy;
+  const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+
+  const nx = dx / dist;
+  const ny = dy / dist;
+
+  // eyes
+  const strength = hover ? 4 : 1.5;
+  if (eyeL && eyeR) {
+    const ex = nx * strength;
+    const ey = ny * strength;
+    eyeL.setAttribute("transform", `translate(${ex}, ${ey})`);
+    eyeR.setAttribute("transform", `translate(${ex}, ${ey})`);
+  }
+
+  // lean
+  const tx = hover ? nx * 6 : 0;
+  const ty = hover ? ny * 4 : 0;
+
+  leanX = lerp(leanX, tx, 0.08);
+  leanY = lerp(leanY, ty, 0.08);
+
+  cleoInner.style.transform =
+    `translate(${leanX}px, ${leanY}px) scale(${hover ? 1.04 : 1})`;
+
+  // glow
+  if (hover) glowPhase += 0.08;
+  else glowPhase *= 0.9;
+
+  const pulse = (Math.sin(glowPhase)+1)/2;
+  const glow = 0.3 + pulse*0.5;
+
+  svgWrap.style.filter =
+    `drop-shadow(0 12px 32px rgba(0,220,255,${glow}))`;
+
+  requestAnimationFrame(cleoLoop);
+}
+
+cleoLoop();
+
+
+// =========================
+// BACKGROUND CANVAS
+// =========================
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+let W,H,pts=[];
+
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+
+  pts = Array.from({length:40}, () => ({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    vx:(Math.random()-.5)*.2,
+    vy:(Math.random()-.5)*.2,
+    r:Math.random()*1.2+.3
+  }));
+}
+
+resize();
+window.addEventListener('resize', resize);
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  pts.forEach(p=>{
+    p.x+=p.vx;
+    p.y+=p.vy;
+
+    if(p.x<0)p.x=W;
+    if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;
+    if(p.y>H)p.y=0;
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle="rgba(0,200,255,.2)";
+    ctx.fill();
+  });
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
