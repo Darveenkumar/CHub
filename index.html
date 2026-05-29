@@ -8,10 +8,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;min-height:100vh;
-  /* no background — only a faint glow from the top */
-  background:
-    radial-gradient(130% 52% at 50% -10%, rgba(0,190,255,.16) 0%, rgba(0,150,255,.05) 40%, rgba(0,150,255,0) 72%),
-    transparent;
+  background: transparent; /* Explicitly transparent as requested */
   font-family:'Inter',sans-serif;overflow:hidden}
 canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
 
@@ -43,11 +40,9 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
   will-change:transform;
   position:relative;
   z-index:9999;
-  /* NO animation here — JS controls this */
 }
 .cleo-inner{
   display:flex;flex-direction:column;align-items:center;gap:2px;
-  /* float animation only on inner — JS never touches this element */
   animation:hoverfloat 4s 1s ease-in-out infinite;
   position:relative;
   z-index:9999;
@@ -66,13 +61,30 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
 .cleo-name{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.22);display:flex;flex-direction:column;align-items:center;gap:2px;}
 .cleo-name span{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(11px,1vw,14px);letter-spacing:.1em;color:#00dcff;}
 
-/* wordmark — always centred */
+/* wordmark — centred with the massive circular vignette built directly behind it */
 .wordmark-section{
   position:relative;
   animation:fadeUp .8s .2s both;
   display:flex;
   flex-direction:column;
   align-items:flex-start;
+}
+
+/* FIXED: Massive, ultra-smooth circular radial glow vignette with zero background constraints */
+.wordmark-section::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Significantly upscaled area for a wide, un-skewed circular dispersion */
+  width: clamp(1000px, 140vw, 1600px);
+  height: clamp(1000px, 140vw, 1600px);
+  border-radius: 50%;
+  /* Gradual decay to completely transparent at 70% bounds */
+  background: radial-gradient(circle, rgba(0,185,255,0.26) 0%, rgba(0,150,255,0.08) 30%, rgba(0,150,255,0.02) 52%, rgba(0,150,255,0) 70%);
+  z-index: -1;
+  pointer-events: none;
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 
@@ -108,7 +120,6 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
 
 <div class="page">
 
-  <!-- CLEO -->
   <div class="cleo-wrap">
     <div class="cleo-area" id="cleoArea">
       <div class="cleo-inner" id="cleoInner">
@@ -116,41 +127,34 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
         <div class="cleo-svg-wrap">
           <svg viewBox="0 0 220 280" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%">
             <defs>
-              <!-- body: light grey-white with soft blue tint -->
               <radialGradient id="bG" cx="38%" cy="28%" r="68%">
                 <stop offset="0%" stop-color="#f2fbff"/>
                 <stop offset="50%" stop-color="#cfeaf8"/>
                 <stop offset="100%" stop-color="#8fc6e6"/>
               </radialGradient>
-              <!-- helmet: matching light white-blue -->
               <radialGradient id="hG" cx="36%" cy="26%" r="68%">
                 <stop offset="0%" stop-color="#f4fcff"/>
                 <stop offset="45%" stop-color="#bce3f8"/>
                 <stop offset="100%" stop-color="#73bae2"/>
               </radialGradient>
-              <!-- visor: userSpaceOnUse so the lids can share it → seamless blink -->
               <radialGradient id="vG" gradientUnits="userSpaceOnUse" cx="92" cy="70" r="96">
                 <stop offset="0%" stop-color="#1f63a8"/>
                 <stop offset="50%" stop-color="#093058"/>
                 <stop offset="100%" stop-color="#03102a"/>
               </radialGradient>
-              <!-- glowing eye -->
               <radialGradient id="eG" cx="38%" cy="32%" r="62%">
                 <stop offset="0%" stop-color="#e8fffd"/>
                 <stop offset="45%" stop-color="#62f0ff"/>
                 <stop offset="100%" stop-color="#00b6dc"/>
               </radialGradient>
-              <!-- cheek blush -->
               <radialGradient id="ckG" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="rgba(255,150,170,.75)"/>
                 <stop offset="100%" stop-color="rgba(255,150,170,0)"/>
               </radialGradient>
-              <!-- gold -->
               <radialGradient id="gG" cx="35%" cy="28%" r="65%">
                 <stop offset="0%" stop-color="#ffe080"/>
                 <stop offset="100%" stop-color="#c87800"/>
               </radialGradient>
-              <!-- red ear -->
               <radialGradient id="rG" cx="40%" cy="30%" r="65%">
                 <stop offset="0%" stop-color="#ff8a98"/>
                 <stop offset="100%" stop-color="#d23344"/>
@@ -165,43 +169,34 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
               <clipPath id="visorClip"><rect x="48" y="54" width="124" height="62" rx="28"/></clipPath>
             </defs>
 
-            <!-- ground glow -->
             <ellipse cx="110" cy="274" rx="50" ry="7" fill="rgba(0,180,255,.16)">
               <animate attributeName="rx" values="50;62;50" dur="4s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values=".16;.26;.16" dur="4s" repeatCount="indefinite"/>
             </ellipse>
 
-            <!-- antenna with glowing bobble -->
             <line x1="110" y1="18" x2="110" y2="9" stroke="#9fd8f0" stroke-width="3" stroke-linecap="round"/>
             <circle cx="110" cy="7" r="4.5" fill="#00dcff" filter="url(#gw)">
               <animate attributeName="r" values="4;5.4;4" dur="2.4s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values=".8;1;.8" dur="2.4s" repeatCount="indefinite"/>
             </circle>
 
-            <!-- ── BODY ── -->
             <path d="M55 168 Q50 232 52 268 L168 268 Q170 232 165 168 Q148 154 110 152 Q72 154 55 168Z" fill="url(#bG)" filter="url(#sh)"/>
-            <!-- body gloss -->
             <path d="M72 158 Q110 150 148 158 Q142 172 110 174 Q78 172 72 158Z" fill="url(#glG)" opacity=".5"/>
-            <!-- teal trim line -->
             <path d="M64 182 Q110 174 156 182" stroke="rgba(160,240,255,.45)" stroke-width="1.5" fill="none" stroke-linecap="round">
               <animate attributeName="opacity" values=".4;.8;.4" dur="2.2s" repeatCount="indefinite"/>
             </path>
-            <!-- 3 gold chest buttons -->
             <circle cx="84" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
             <circle cx="84" cy="210" r="9" fill="url(#glG)" opacity=".4"/>
             <circle cx="110" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
             <circle cx="110" cy="210" r="9" fill="url(#glG)" opacity=".4"/>
             <circle cx="136" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
             <circle cx="136" cy="210" r="9" fill="url(#glG)" opacity=".4"/>
-            <!-- button highlights -->
             <circle cx="81" cy="207" r="3" fill="rgba(255,255,255,.6)"/>
             <circle cx="107" cy="207" r="3" fill="rgba(255,255,255,.6)"/>
             <circle cx="133" cy="207" r="3" fill="rgba(255,255,255,.6)"/>
-            <!-- CLEO badge -->
             <rect x="82" y="234" width="56" height="20" rx="8" fill="rgba(0,100,200,.25)" stroke="rgba(0,220,255,.5)" stroke-width="1"/>
             <text x="110" y="248" text-anchor="middle" font-family="'Syne',sans-serif" font-size="9" font-weight="800" fill="#00dcff" letter-spacing="2.5">CLEO</text>
 
-            <!-- ── ARMS ── -->
             <path d="M57 170 Q30 188 26 220 Q24 238 34 242 Q46 246 52 230 Q58 212 68 186Z" fill="url(#bG)" filter="url(#sh2)"/>
             <ellipse cx="32" cy="243" rx="13" ry="15" fill="url(#bG)" filter="url(#sh2)"/>
             <ellipse cx="30" cy="239" rx="8" ry="5" fill="url(#glG)" opacity=".4"/>
@@ -209,29 +204,22 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
             <ellipse cx="188" cy="243" rx="13" ry="15" fill="url(#bG)" filter="url(#sh2)"/>
             <ellipse cx="186" cy="239" rx="8" ry="5" fill="url(#glG)" opacity=".4"/>
 
-            <!-- gold neck ring -->
             <ellipse cx="110" cy="153" rx="24" ry="6" fill="url(#gG)" filter="url(#sh2)"/>
             <ellipse cx="110" cy="151" rx="20" ry="4" fill="url(#glG)" opacity=".5"/>
 
-            <!-- ── NECK ── -->
             <rect x="94" y="134" width="32" height="22" rx="11" fill="url(#bG)" filter="url(#sh2)"/>
 
-            <!-- ── HELMET ── -->
             <ellipse cx="110" cy="80" rx="71" ry="67" fill="url(#hG)" filter="url(#sh)"/>
-            <!-- helmet gloss -->
             <ellipse cx="88" cy="44" rx="40" ry="18" fill="url(#glG)" opacity=".42" transform="rotate(-10 88 44)"/>
 
-            <!-- red ear discs -->
             <ellipse cx="39" cy="86" rx="14" ry="17" fill="url(#rG)" filter="url(#sh2)"/>
             <ellipse cx="38" cy="82" rx="7" ry="8" fill="rgba(255,210,210,.45)"/>
             <ellipse cx="181" cy="86" rx="14" ry="17" fill="url(#rG)" filter="url(#sh2)"/>
             <ellipse cx="180" cy="82" rx="7" ry="8" fill="rgba(255,210,210,.45)"/>
 
-            <!-- ── VISOR (dark glass over face) ── -->
             <rect x="48" y="54" width="124" height="62" rx="28" fill="url(#vG)"/>
             <rect x="48" y="54" width="124" height="62" rx="28" fill="none" stroke="rgba(120,210,255,.45)" stroke-width="1.5"/>
 
-            <!-- cheek blushes -->
             <ellipse cx="66" cy="103" rx="9" ry="5.5" fill="url(#ckG)">
               <animate attributeName="opacity" values=".6;.95;.6" dur="3s" repeatCount="indefinite"/>
             </ellipse>
@@ -239,48 +227,33 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
               <animate attributeName="opacity" values=".6;.95;.6" dur="3s" repeatCount="indefinite"/>
             </ellipse>
 
-            <!-- ── HUMAN EYES (black & white realistic) ── -->
-            <!-- left eye white -->
             <ellipse cx="84" cy="86" rx="15" ry="14" fill="white"/>
-            <!-- left iris - dark brown -->
             <circle cx="84" cy="86" r="10" fill="#1a1008"/>
             <circle cx="84" cy="86" r="8.5" fill="#2d1f08"/>
-            <!-- left pupil -->
             <circle cx="84" cy="86" r="6" fill="#050200"/>
-            <!-- left catchlights -->
             <circle cx="87.5" cy="82" r="2.8" fill="rgba(255,255,255,.9)"/>
             <circle cx="81" cy="90" r="1.4" fill="rgba(255,255,255,.35)"/>
-            <!-- left eye shadow top -->
             <ellipse cx="84" cy="74" rx="15" ry="6" fill="rgba(0,0,0,.15)"/>
 
-            <!-- right eye white -->
             <ellipse cx="136" cy="86" rx="15" ry="14" fill="white"/>
-            <!-- right iris -->
             <circle cx="136" cy="86" r="10" fill="#1a1008"/>
             <circle cx="136" cy="86" r="8.5" fill="#2d1f08"/>
-            <!-- right pupil -->
             <circle cx="136" cy="86" r="6" fill="#050200"/>
-            <!-- right catchlights -->
             <circle cx="139.5" cy="82" r="2.8" fill="rgba(255,255,255,.9)"/>
             <circle cx="133" cy="90" r="1.4" fill="rgba(255,255,255,.35)"/>
-            <!-- right eye shadow top -->
             <ellipse cx="136" cy="74" rx="15" ry="6" fill="rgba(0,0,0,.15)"/>
 
-            <!-- little smile -->
             <path d="M100 104 Q110 112 120 104" stroke="#5ef0ff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/>
 
-            <!-- eyelids — ellipse-based, share the visor gradient so they vanish into the glass -->
             <ellipse id="lidLtop" cx="84"  cy="86" rx="15" ry="0" fill="url(#vG)"/>
             <ellipse id="lidLbot" cx="84"  cy="86" rx="15" ry="0" fill="url(#vG)"/>
             <ellipse id="lidRtop" cx="136" cy="86" rx="15" ry="0" fill="url(#vG)"/>
             <ellipse id="lidRbot" cx="136" cy="86" rx="15" ry="0" fill="url(#vG)"/>
 
-            <!-- glass sheen ABOVE lids (clipped) so open/closed stay consistent -->
             <g clip-path="url(#visorClip)">
               <ellipse cx="86" cy="64" rx="30" ry="10" fill="rgba(255,255,255,.16)" transform="rotate(-6 86 64)"/>
             </g>
 
-            <!-- orbit ring -->
             <circle cx="110" cy="200" r="68" stroke="rgba(0,200,255,.07)" stroke-width="1.5" stroke-dasharray="4 9" fill="none">
               <animateTransform attributeName="transform" type="rotate" from="0 110 200" to="360 110 200" dur="18s" repeatCount="indefinite"/>
             </circle>
@@ -291,7 +264,6 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
     </div>
   </div>
 
-  <!-- Wordmark — centred via align-items:center on .page -->
   <div class="wordmark-section" id="wmSection">
     <div class="wordmark">
       <span class="wm-core">CORE</span><span class="wm-hub">HUB</span>
@@ -305,16 +277,12 @@ canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
 </div>
 
 <script>
-// ── realistic blink — ellipse lids scale from top & bottom to meet in centre ──
 function blink() {
   const closeSteps = 7, openSteps = 12;
   const closeDur = 70, openDur = 150;
-  const maxRy = 14; // matches eye ry
+  const maxRy = 14; 
   let f = 0;
 
-  // Each lid is an ellipse centred on the eye
-  // Top lid: cy starts at top of eye (86-14=72), grows downward
-  // Bot lid: cy starts at bottom (86+14=100), grows upward
   const eyes = [
     { top:'lidLtop', bot:'lidLbot', cx:84,  eyeTop:72, eyeBot:100, eyeCY:86 },
     { top:'lidRtop', bot:'lidRbot', cx:136, eyeTop:72, eyeBot:100, eyeCY:86 },
@@ -329,12 +297,10 @@ function blink() {
       const tl = document.getElementById(e.top);
       const bl = document.getElementById(e.bot);
       if(!tl||!bl) return;
-      // top lid: cx fixed, cy moves from eyeTop down toward eyeCY
       tl.setAttribute('rx', 15);
       tl.setAttribute('ry', ry);
       tl.setAttribute('cx', e.cx);
       tl.setAttribute('cy', e.eyeTop + ry);
-      // bottom lid: mirror
       bl.setAttribute('rx', 15);
       bl.setAttribute('ry', ry * 0.6);
       bl.setAttribute('cx', e.cx);
@@ -342,14 +308,12 @@ function blink() {
     });
   }
 
-  // close
   const ci = setInterval(() => {
     f++;
     setLids(easeIn(f / closeSteps));
     if (f >= closeSteps) {
       clearInterval(ci); f = 0;
       setTimeout(() => {
-        // open
         const oi = setInterval(() => {
           f++;
           setLids(easeOut(1 - f / openSteps));
@@ -365,7 +329,6 @@ function blink() {
 }
 setTimeout(blink, 2000);
 
-// ── icons ──
 const iconDefs = [
   {color:'#00dcff',svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#00dcff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1"/></svg>`},
   {color:'#4dffa0',svg:`<svg viewBox="0 0 24 24" fill="none" stroke="#4dffa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`},
@@ -383,7 +346,6 @@ const cleoArea=document.getElementById('cleoArea');
 document.addEventListener('mousemove', e => { mouseX = e.clientX; });
 
 function moveCleo() {
-  // sweep CLEO from far left to far right, leaving a small margin from the edges
   const cleoW = cleoArea.offsetWidth || 120;
   const amp = Math.max(60, window.innerWidth / 2 - cleoW / 2 - 24);
   cleoTargetX = ((mouseX / window.innerWidth) * 2 - 1) * amp;
@@ -393,7 +355,6 @@ function moveCleo() {
 }
 moveCleo();
 
-// Fixed positions [xRatio along wordmark, yOffset from CLEO centre]
 const fixedPos=[[0.07,10],[0.18,45],[0.30,25],[0.70,20],[0.82,45],[0.93,12]];
 
 function initParticles(){
@@ -415,8 +376,6 @@ function initParticles(){
     particles.push({el,ox,oy,x:ox,y:oy,vx:0,vy:0});
   });
 }
-
-document.addEventListener('mousemove',e=>{mouseX=e.clientX;});
 
 let cleoSX=0,cleoSY=0;
 function loop(){
@@ -440,7 +399,6 @@ setTimeout(initParticles,350);
 window.addEventListener('resize',initParticles);
 loop();
 
-// ── particles canvas ──
 const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
 let W,H,pts=[];
