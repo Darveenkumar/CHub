@@ -17,8 +17,6 @@ html,body{width:100%;min-height:100vh;
   width: 100%;
   padding-bottom: 24px;
   overflow: visible;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
 }
 
 .page{
@@ -78,31 +76,32 @@ html,body{width:100%;min-height:100vh;
   flex-direction:column;
   align-items:flex-start;
   width: 100%;
-  max-width: max-content; 
+  max-width: 100%;
+  overflow: hidden;
 }
 
-/* Background Vignette */
-.wordmark-section::before {
-  content: '';
+/* Background Vignette — standalone, not clipped */
+.glow-orb {
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(1000px, 130vw, 1500px);
-  height: clamp(1000px, 130vw, 1500px);
+  width: clamp(1000px, 140vw, 1600px);
+  height: clamp(1000px, 140vw, 1600px);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,185,255,0.28) 0%, rgba(0,150,255,0.09) 25%, rgba(0,150,255,0.02) 48%, rgba(0,150,255,0) 65%);
-  z-index: -1;
+  background: radial-gradient(circle, rgba(0,185,255,0.26) 0%, rgba(0,150,255,0.08) 28%, rgba(0,150,255,0.02) 50%, rgba(0,150,255,0) 68%);
   pointer-events: none;
+  z-index: 0;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, rgba(0,0,0,0.5) 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, rgba(0,0,0,0.5) 60%, transparent 100%);
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 
 .wordmark{
   font-family:'Syne',sans-serif;font-weight:800;
-  font-size:clamp(64px,12vw,150px);
+  font-size:clamp(40px,12vw,150px);
   line-height:.88;letter-spacing:-.04em;
   display:flex;align-items:baseline;gap:clamp(6px,.8vw,14px);
-  white-space:nowrap;
   width: 100%;
 }
 .wm-core{
@@ -113,25 +112,25 @@ html,body{width:100%;min-height:100vh;
 @keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
 .wm-hub{color:rgba(255,255,255,.72);font-weight:700;}
 
-/* FIXED: Tagline Row with Micro-Adjusted Inward Alignment */
+/* Tagline Row */
 .tagline-row{
   margin-top:12px;
   display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;
+  gap:4px 16px;
   animation:fadeUp .8s .4s both;
   width:100%;
   padding-right: 2px;
 }
-/* Shshifted 8px inwards to hit the precise optical grid alignment line */
 .tag-left{
   font-size:clamp(11px,1.1vw,14px);
-  color:rgba(255,255,255,.55);
+  color:rgba(255,255,255,.7);
   font-weight:300;
   letter-spacing:.04em;
-  white-space:nowrap;
   padding-left: 8px; 
 }
-.tag-left strong{color:rgba(0,220,255,.7);font-weight:400}
-.tag-right{font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,.55);font-weight:300;letter-spacing:.04em;white-space:nowrap;}
+.tag-left strong{color:rgba(0,220,255,.85);font-weight:400}
+.tag-right{font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,.7);font-weight:300;letter-spacing:.04em;}
 
 /* TINY GLITTER BACKGROUND STARS */
 .star-field {
@@ -157,6 +156,7 @@ html,body{width:100%;min-height:100vh;
 <body>
 
 <div class="header-wrapper" id="headerBlock">
+  <div class="glow-orb"></div>
   <div class="star-field" id="starField"></div>
   <div id="icon-layer"></div>
 
