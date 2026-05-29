@@ -11,12 +11,14 @@ html,body{width:100%;min-height:100vh;
   background: transparent; 
   font-family:'Inter',sans-serif;overflow-x:hidden}
 
-/* HEADER SECTION CONTAINER WITH STRICT BOTTOM CLIP */
+/* HEADER SECTION CONTAINER WITH SOFT FADE BOTTOM */
 .header-wrapper {
   position: relative;
   width: 100%;
-  padding-bottom: 24px; 
-  overflow: hidden; 
+  padding-bottom: 24px;
+  overflow: visible;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
 }
 
 .page{
@@ -137,6 +139,7 @@ html,body{width:100%;min-height:100vh;
   inset: 0;
   pointer-events: none;
   z-index: 1;
+  overflow: hidden;
 }
 .star {
   position: absolute;
