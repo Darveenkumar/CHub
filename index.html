@@ -16,7 +16,7 @@ html, body {
   font-family: 'Inter', sans-serif;
 }
 
-/* ── Root container ── */
+/* ── Root ── */
 .root {
   position: relative;
   width: 100%;
@@ -24,17 +24,17 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;       /* centres inline-flex children */
+  align-items: center;
   padding: 0 clamp(24px, 5vw, 72px);
 }
 
-/* ── Stars (clipped inside root) ── */
+/* ── Star field ── */
 .star-field {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  overflow: hidden;
 }
 .star {
   position: absolute;
@@ -48,7 +48,7 @@ html, body {
   50%       { opacity: var(--op); transform: scale(1.3); filter: drop-shadow(0 0 2px #00dcff); }
 }
 
-/* ── Floating icons layer ── */
+/* ── Floating icons ── */
 #icon-layer {
   position: absolute;
   inset: 0;
@@ -65,7 +65,7 @@ html, body {
 }
 .ficon svg { width: 22px; height: 22px; }
 
-/* ── CLEO row ── */
+/* ── CLEO ── */
 .cleo-wrap {
   position: relative;
   z-index: 20;
@@ -76,12 +76,11 @@ html, body {
   margin-bottom: -6px;
 }
 .cleo-slide {
+  position: relative;
   display: flex;
   justify-content: center;
   will-change: transform;
-  position: relative;
 }
-/* Small glow behind CLEO — lives in cleo-slide so it moves with her */
 .cleo-slide::before {
   content: '';
   position: absolute;
@@ -89,11 +88,7 @@ html, body {
   transform: translate(-50%, -55%);
   width: 280px; height: 280px;
   border-radius: 50%;
-  background: radial-gradient(circle,
-    rgba(0,210,255,0.28) 0%,
-    rgba(0,160,255,0.10) 45%,
-    transparent 72%
-  );
+  background: radial-gradient(circle, rgba(0,210,255,.28) 0%, rgba(0,160,255,.10) 45%, transparent 72%);
   pointer-events: none;
   z-index: -1;
 }
@@ -106,7 +101,7 @@ html, body {
   cursor: pointer;
 }
 @keyframes hoverfloat {
-  0%,100% { transform: translateY(0)   rotate(0deg);   }
+  0%,100% { transform: translateY(0)    rotate(0deg);   }
   28%     { transform: translateY(-12px) rotate(-1.2deg); }
   55%     { transform: translateY(-18px) rotate(.8deg);   }
   78%     { transform: translateY(-8px)  rotate(-.6deg);  }
@@ -123,32 +118,29 @@ html, body {
   color: #00dcff;
 }
 
-/* ── Wordmark — always centred, tagline pinned to it ── */
+/* ── Wordmark ── */
 .wordmark-section {
   position: relative;
   z-index: 20;
-  display: inline-flex;          /* shrink-wraps to text width */
+  display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
+  margin: 0 auto;
   animation: fadeUp .8s .2s both;
-  /* centred inside the full-width .root */
-  margin-left: auto;
-  margin-right: auto;
 }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: none; }
 }
-
 .wordmark {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: clamp(52px, 11vw, 148px);
+  font-size: 120px; /* set by fitWordmark() */
   line-height: .88;
   letter-spacing: -.04em;
   display: flex;
   align-items: baseline;
-  gap: clamp(4px, .6vw, 12px);
+  gap: .06em;
   white-space: nowrap;
 }
 .wm-core {
@@ -160,19 +152,18 @@ html, body {
   animation: shimmer 6s linear infinite;
 }
 @keyframes shimmer { 0% { background-position: 0%; } 100% { background-position: 200%; } }
-
 .wm-hub { color: rgba(255,255,255,.72); font-weight: 700; }
 
-/* ── Tagline — spans full wordmark width, left & right locked to edges ── */
+/* ── Tagline ── */
 .tagline-row {
   margin-top: 10px;
-  width: 100%;                   /* matches wordmark-section width = wordmark width */
+  width: 100%;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   animation: fadeUp .8s .4s both;
 }
-.tag-left {
+.tag-left, .tag-right {
   font-size: clamp(11px, 1.05vw, 14px);
   color: rgba(255,255,255,.65);
   font-weight: 300;
@@ -180,13 +171,6 @@ html, body {
   white-space: nowrap;
 }
 .tag-left strong { color: rgba(0,220,255,.85); font-weight: 400; }
-.tag-right {
-  font-size: clamp(11px, 1.05vw, 14px);
-  color: rgba(255,255,255,.65);
-  font-weight: 300;
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
 </style>
 </head>
 <body>
@@ -195,7 +179,6 @@ html, body {
   <div class="star-field" id="starField"></div>
   <div id="icon-layer"></div>
 
-  <!-- CLEO -->
   <div class="cleo-wrap">
     <div class="cleo-slide" id="cleoSlide">
       <div class="cleo-inner" id="cleoInner">
@@ -206,15 +189,15 @@ html, body {
               <radialGradient id="hG" cx="36%" cy="26%" r="68%"><stop offset="0%" stop-color="#f4fcff"/><stop offset="45%" stop-color="#bce3f8"/><stop offset="100%" stop-color="#73bae2"/></radialGradient>
               <radialGradient id="vG" gradientUnits="userSpaceOnUse" cx="92" cy="70" r="96"><stop offset="0%" stop-color="#1f63a8"/><stop offset="50%" stop-color="#093058"/><stop offset="100%" stop-color="#03102a"/></radialGradient>
               <radialGradient id="ckG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(255,150,170,.75)"/><stop offset="100%" stop-color="rgba(255,150,170,0)"/></radialGradient>
-              <radialGradient id="gG" cx="35%" cy="28%" r="65%"><stop offset="0%" stop-color="#ffe080"/><stop offset="100%" stop-color="#c87800"/></radialGradient>
-              <radialGradient id="rG" cx="40%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff8a98"/><stop offset="100%" stop-color="#d23344"/></radialGradient>
+              <radialGradient id="gG"  cx="35%" cy="28%" r="65%"><stop offset="0%" stop-color="#ffe080"/><stop offset="100%" stop-color="#c87800"/></radialGradient>
+              <radialGradient id="rG"  cx="40%" cy="30%" r="65%"><stop offset="0%" stop-color="#ff8a98"/><stop offset="100%" stop-color="#d23344"/></radialGradient>
               <linearGradient id="glG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></linearGradient>
-              <filter id="sh"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="rgba(0,0,0,.32)"/></filter>
+              <filter id="sh" ><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="rgba(0,0,0,.32)"/></filter>
               <filter id="sh2"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,.22)"/></filter>
-              <filter id="gw"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="gw" ><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
               <clipPath id="visorClip"><rect x="48" y="54" width="124" height="62" rx="28"/></clipPath>
             </defs>
-            <!-- Shadow under feet -->
+            <!-- Ground shadow -->
             <ellipse cx="110" cy="274" rx="50" ry="7" fill="rgba(0,180,255,.16)"><animate attributeName="rx" values="50;62;50" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".16;.26;.16" dur="4s" repeatCount="indefinite"/></ellipse>
             <!-- Antenna -->
             <line x1="110" y1="18" x2="110" y2="9" stroke="#9fd8f0" stroke-width="3" stroke-linecap="round"/>
@@ -224,34 +207,54 @@ html, body {
             <path d="M72 158 Q110 150 148 158 Q142 172 110 174 Q78 172 72 158Z" fill="url(#glG)" opacity=".5"/>
             <path d="M64 182 Q110 174 156 182" stroke="rgba(160,240,255,.45)" stroke-width="1.5" fill="none" stroke-linecap="round"><animate attributeName="opacity" values=".4;.8;.4" dur="2.2s" repeatCount="indefinite"/></path>
             <!-- Belly buttons -->
-            <circle cx="84" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/><circle cx="110" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/><circle cx="136" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
-            <circle cx="81" cy="207" r="3" fill="rgba(255,255,255,.6)"/><circle cx="107" cy="207" r="3" fill="rgba(255,255,255,.6)"/><circle cx="133" cy="207" r="3" fill="rgba(255,255,255,.6)"/>
+            <circle cx="84"  cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
+            <circle cx="110" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
+            <circle cx="136" cy="210" r="9" fill="url(#gG)" filter="url(#sh2)"/>
+            <circle cx="81"  cy="207" r="3" fill="rgba(255,255,255,.6)"/>
+            <circle cx="107" cy="207" r="3" fill="rgba(255,255,255,.6)"/>
+            <circle cx="133" cy="207" r="3" fill="rgba(255,255,255,.6)"/>
             <!-- Name badge -->
             <rect x="82" y="234" width="56" height="20" rx="8" fill="rgba(0,100,200,.25)" stroke="rgba(0,220,255,.5)" stroke-width="1"/>
             <text x="110" y="248" text-anchor="middle" font-family="'Syne',sans-serif" font-size="9" font-weight="800" fill="#00dcff" letter-spacing="2.5">CLEO</text>
             <!-- Arms -->
-            <path d="M57 170 Q30 188 26 220 Q24 238 34 242 Q46 246 52 230 Q58 212 68 186Z" fill="url(#bG)" filter="url(#sh2)"/><ellipse cx="32" cy="243" rx="13" ry="15" fill="url(#bG)" filter="url(#sh2)"/><ellipse cx="30" cy="239" rx="8" ry="5" fill="url(#glG)" opacity=".4"/>
-            <path d="M163 170 Q190 188 194 220 Q196 238 186 242 Q174 246 168 230 Q162 212 152 186Z" fill="url(#bG)" filter="url(#sh2)"/><ellipse cx="188" cy="243" rx="13" ry="15" fill="url(#bG)" filter="url(#sh2)"/><ellipse cx="186" cy="239" rx="8" ry="5" fill="url(#glG)" opacity=".4"/>
+            <path d="M57 170 Q30 188 26 220 Q24 238 34 242 Q46 246 52 230 Q58 212 68 186Z" fill="url(#bG)" filter="url(#sh2)"/>
+            <ellipse cx="32" cy="243" rx="13" ry="15" fill="url(#bG)" filter="url(#sh2)"/>
+            <ellipse cx="30" cy="239" rx="8"  ry="5"  fill="url(#glG)" opacity=".4"/>
+            <path d="M163 170 Q190 188 194 220 Q196 238 186 242 Q174 246 168 230 Q162 212 152 186Z" fill="url(#bG)" filter="url(#sh2)"/>
+            <ellipse cx="188" cy="243" rx="13" ry="15" fill="url(#bG)" filter="url(#sh2)"/>
+            <ellipse cx="186" cy="239" rx="8"  ry="5"  fill="url(#glG)" opacity=".4"/>
             <!-- Collar -->
-            <ellipse cx="110" cy="153" rx="24" ry="6" fill="url(#gG)" filter="url(#sh2)"/><ellipse cx="110" cy="151" rx="20" ry="4" fill="url(#glG)" opacity=".5"/>
+            <ellipse cx="110" cy="153" rx="24" ry="6"  fill="url(#gG)"  filter="url(#sh2)"/>
+            <ellipse cx="110" cy="151" rx="20" ry="4"  fill="url(#glG)" opacity=".5"/>
             <rect x="94" y="134" width="32" height="22" rx="11" fill="url(#bG)" filter="url(#sh2)"/>
             <!-- Head -->
-            <ellipse cx="110" cy="80" rx="71" ry="67" fill="url(#hG)" filter="url(#sh)"/><ellipse cx="88" cy="44" rx="40" ry="18" fill="url(#glG)" opacity=".42" transform="rotate(-10 88 44)"/>
+            <ellipse cx="110" cy="80" rx="71" ry="67" fill="url(#hG)" filter="url(#sh)"/>
+            <ellipse cx="88"  cy="44" rx="40" ry="18" fill="url(#glG)" opacity=".42" transform="rotate(-10 88 44)"/>
             <!-- Cheeks -->
-            <ellipse cx="39" cy="86" rx="14" ry="17" fill="url(#rG)" filter="url(#sh2)"/><ellipse cx="38" cy="82" rx="7" ry="8" fill="rgba(255,210,210,.45)"/>
-            <ellipse cx="181" cy="86" rx="14" ry="17" fill="url(#rG)" filter="url(#sh2)"/><ellipse cx="180" cy="82" rx="7" ry="8" fill="rgba(255,210,210,.45)"/>
+            <ellipse cx="39"  cy="86" rx="14" ry="17" fill="url(#rG)" filter="url(#sh2)"/>
+            <ellipse cx="38"  cy="82" rx="7"  ry="8"  fill="rgba(255,210,210,.45)"/>
+            <ellipse cx="181" cy="86" rx="14" ry="17" fill="url(#rG)" filter="url(#sh2)"/>
+            <ellipse cx="180" cy="82" rx="7"  ry="8"  fill="rgba(255,210,210,.45)"/>
             <!-- Visor -->
             <rect x="48" y="54" width="124" height="62" rx="28" fill="url(#vG)" stroke="rgba(120,210,255,.45)" stroke-width="1.5"/>
-            <ellipse cx="66" cy="103" rx="9" ry="5.5" fill="url(#ckG)"><animate attributeName="opacity" values=".6;.95;.6" dur="3s" repeatCount="indefinite"/></ellipse>
+            <ellipse cx="66"  cy="103" rx="9" ry="5.5" fill="url(#ckG)"><animate attributeName="opacity" values=".6;.95;.6" dur="3s" repeatCount="indefinite"/></ellipse>
             <ellipse cx="154" cy="103" rx="9" ry="5.5" fill="url(#ckG)"><animate attributeName="opacity" values=".6;.95;.6" dur="3s" repeatCount="indefinite"/></ellipse>
             <!-- Eyes -->
-            <ellipse cx="84" cy="86" rx="15" ry="14" fill="white"/><circle cx="84" cy="86" r="10" fill="#1a1008"/><circle cx="84" cy="86" r="6" fill="#050200"/><circle cx="87.5" cy="82" r="2.8" fill="rgba(255,255,255,.9)"/>
-            <ellipse cx="136" cy="86" rx="15" ry="14" fill="white"/><circle cx="136" cy="86" r="10" fill="#1a1008"/><circle cx="136" cy="86" r="6" fill="#050200"/><circle cx="139.5" cy="82" r="2.8" fill="rgba(255,255,255,.9)"/>
+            <ellipse cx="84"  cy="86" rx="15" ry="14" fill="white"/>
+            <circle  cx="84"  cy="86" r="10"          fill="#1a1008"/>
+            <circle  cx="84"  cy="86" r="6"           fill="#050200"/>
+            <circle  cx="87.5" cy="82" r="2.8"        fill="rgba(255,255,255,.9)"/>
+            <ellipse cx="136" cy="86" rx="15" ry="14" fill="white"/>
+            <circle  cx="136" cy="86" r="10"          fill="#1a1008"/>
+            <circle  cx="136" cy="86" r="6"           fill="#050200"/>
+            <circle  cx="139.5" cy="82" r="2.8"       fill="rgba(255,255,255,.9)"/>
             <!-- Smile -->
             <path d="M100 104 Q110 112 120 104" stroke="#5ef0ff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/>
-            <!-- Eyelids (JS-controlled) -->
-            <ellipse id="lidLtop" cx="84" cy="86" rx="15" ry="0" fill="url(#vG)"/><ellipse id="lidLbot" cx="84" cy="86" rx="15" ry="0" fill="url(#vG)"/>
-            <ellipse id="lidRtop" cx="136" cy="86" rx="15" ry="0" fill="url(#vG)"/><ellipse id="lidRbot" cx="136" cy="86" rx="15" ry="0" fill="url(#vG)"/>
+            <!-- Eyelids (JS-animated) -->
+            <ellipse id="lidLtop" cx="84"  cy="86" rx="15" ry="0" fill="url(#vG)"/>
+            <ellipse id="lidLbot" cx="84"  cy="86" rx="15" ry="0" fill="url(#vG)"/>
+            <ellipse id="lidRtop" cx="136" cy="86" rx="15" ry="0" fill="url(#vG)"/>
+            <ellipse id="lidRbot" cx="136" cy="86" rx="15" ry="0" fill="url(#vG)"/>
             <!-- Visor glare -->
             <g clip-path="url(#visorClip)"><ellipse cx="86" cy="64" rx="30" ry="10" fill="rgba(255,255,255,.16)" transform="rotate(-6 86 64)"/></g>
             <!-- Orbit ring -->
@@ -263,12 +266,11 @@ html, body {
     </div>
   </div>
 
-  <!-- Wordmark -->
   <div class="wordmark-section" id="wmSection">
     <div class="wordmark">
       <span class="wm-core">CORE</span><span class="wm-hub">HUB</span>
     </div>
-    <div class="tagline-row" id="taglineRow">
+    <div class="tagline-row">
       <span class="tag-left"><strong>CO</strong>mpliance &nbsp;·&nbsp; <strong>RE</strong>newal &nbsp;·&nbsp; Hub</span>
       <span class="tag-right">Contracts &nbsp;·&nbsp; Licences &nbsp;·&nbsp; Direct Purchases</span>
     </div>
@@ -276,20 +278,26 @@ html, body {
 </div>
 
 <script>
-/* ════════════════════════════════
-   STARS
-════════════════════════════════ */
+const rootEl    = document.getElementById('root');
+const cleoSlide = document.getElementById('cleoSlide');
+
+/* ── Fit wordmark edge to edge ── */
+function fitWordmark() {
+  const wm    = document.querySelector('.wordmark');
+  const avail = rootEl.offsetWidth - 2 * parseFloat(getComputedStyle(rootEl).paddingLeft);
+  wm.style.fontSize = '100px';
+  wm.style.fontSize = Math.floor(100 * avail / wm.scrollWidth) + 'px';
+}
+document.fonts.ready.then(fitWordmark);
+window.addEventListener('resize', fitWordmark);
+
+/* ── Stars ── */
 (function(){
   const c = document.getElementById('starField');
-  for(let i = 0; i < 50; i++){
+  for (let i = 0; i < 50; i++) {
     const s = document.createElement('div');
     s.className = 'star';
-    s.style.cssText = `
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      width:${Math.random()*1.8+0.8}px;
-      height:${Math.random()*1.8+0.8}px;
-    `;
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()*1.8+0.8}px;height:${Math.random()*1.8+0.8}px;`;
     s.style.setProperty('--dur',   (Math.random()*3+2.5)+'s');
     s.style.setProperty('--delay', (Math.random()*5)+'s');
     s.style.setProperty('--op',    (Math.random()*0.5+0.3));
@@ -297,69 +305,55 @@ html, body {
   }
 })();
 
-/* ════════════════════════════════
-   BLINK
-════════════════════════════════ */
-function blink(){
+/* ── Blink ── */
+function blink() {
   const CLOSE_STEPS=7, OPEN_STEPS=12, CLOSE_DUR=70, OPEN_DUR=150, MAX_RY=14;
-  const eyes=[
-    {top:'lidLtop',bot:'lidLbot',eyeTop:72,eyeBot:100},
-    {top:'lidRtop',bot:'lidRbot',eyeTop:72,eyeBot:100}
+  const eyes = [
+    { top:'lidLtop', bot:'lidLbot', eyeTop:72, eyeBot:100 },
+    { top:'lidRtop', bot:'lidRbot', eyeTop:72, eyeBot:100 }
   ];
-  function setLids(p){
+  function setLids(p) {
     const ry = p * MAX_RY;
-    eyes.forEach(e=>{
-      const t=document.getElementById(e.top), b=document.getElementById(e.bot);
-      if(!t||!b) return;
-      t.setAttribute('ry',ry);   t.setAttribute('cy', e.eyeTop + ry);
-      b.setAttribute('ry',ry*.6); b.setAttribute('cy', e.eyeBot - ry*.6);
+    eyes.forEach(e => {
+      const t = document.getElementById(e.top), b = document.getElementById(e.bot);
+      if (!t||!b) return;
+      t.setAttribute('ry', ry);    t.setAttribute('cy', e.eyeTop + ry);
+      b.setAttribute('ry', ry*.6); b.setAttribute('cy', e.eyeBot - ry*.6);
     });
   }
-  let f=0;
-  const ci = setInterval(()=>{
-    f++; setLids(f/CLOSE_STEPS);
-    if(f>=CLOSE_STEPS){
-      clearInterval(ci); f=0;
-      setTimeout(()=>{
-        const oi = setInterval(()=>{
-          f++; setLids(1-(f/OPEN_STEPS));
-          if(f>=OPEN_STEPS){ clearInterval(oi); setLids(0); setTimeout(blink, 3000+Math.random()*3000); }
-        }, OPEN_DUR/OPEN_STEPS);
+  let f = 0;
+  const ci = setInterval(() => {
+    f++; setLids(f / CLOSE_STEPS);
+    if (f >= CLOSE_STEPS) {
+      clearInterval(ci); f = 0;
+      setTimeout(() => {
+        const oi = setInterval(() => {
+          f++; setLids(1 - f / OPEN_STEPS);
+          if (f >= OPEN_STEPS) { clearInterval(oi); setLids(0); setTimeout(blink, 3000 + Math.random()*3000); }
+        }, OPEN_DUR / OPEN_STEPS);
       }, 45);
     }
-  }, CLOSE_DUR/CLOSE_STEPS);
+  }, CLOSE_DUR / CLOSE_STEPS);
 }
 setTimeout(blink, 1800);
 
-/* ════════════════════════════════
-   CLEO MOUSE TRACKING
-   — follows mouse while inside root
-   — drifts back to centre 2s after mouse leaves
-════════════════════════════════ */
-const cleoSlide = document.getElementById('cleoSlide');
-const rootEl    = document.getElementById('root');
-let cleoX = 0, cleoTarget = 0;
-let mouseActive = false, leftAt = 0;
-let mx = 0;
+/* ── CLEO mouse tracking ── */
+let cleoX = 0, cleoTarget = 0, mouseActive = false, leftAt = 0, mx = 0;
 
-// Use pageX and root's left so it works correctly inside SP iframes
 rootEl.addEventListener('mousemove', e => {
   mx = e.pageX - rootEl.getBoundingClientRect().left - window.pageXOffset;
   mouseActive = true;
 });
-rootEl.addEventListener('mouseleave', () => {
-  mouseActive = false;
-  leftAt = Date.now();
-});
+rootEl.addEventListener('mouseleave', () => { mouseActive = false; leftAt = Date.now(); });
 rootEl.addEventListener('mouseenter', e => {
   mx = e.pageX - rootEl.getBoundingClientRect().left - window.pageXOffset;
   mouseActive = true;
 });
 
-(function tickCleo(){
+(function tickCleo() {
   if (mouseActive) {
     const w   = rootEl.offsetWidth;
-    const amp = Math.max(60, w / 2 - (cleoSlide.offsetWidth || 120) / 2 - 24);
+    const amp = Math.max(60, w/2 - (cleoSlide.offsetWidth||120)/2 - 24);
     cleoTarget = ((mx / w) * 2 - 1) * amp;
   } else if (Date.now() - leftAt > 2000) {
     cleoTarget = 0;
@@ -369,61 +363,56 @@ rootEl.addEventListener('mouseenter', e => {
   requestAnimationFrame(tickCleo);
 })();
 
-/* ════════════════════════════════
-   FLOATING ICONS — repelled by CLEO
-════════════════════════════════ */
+/* ── Floating icons repelled by CLEO ── */
 const ICONS = [
   `<svg viewBox="0 0 24 24" fill="none" stroke="#00dcff" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
   `<svg viewBox="0 0 24 24" fill="none" stroke="#4dffa0" stroke-width="1.6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
   `<svg viewBox="0 0 24 24" fill="none" stroke="#7b8cff" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   `<svg viewBox="0 0 24 24" fill="none" stroke="#f0c060" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-  `<svg viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="17" r="0.8" fill="#ff6b6b"/></svg>`,
   `<svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.6"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>`
 ];
-/* x-positions as fraction of wordmark width, y-offset from CLEO centre */
 const ICON_POS = [[0.05,12],[0.16,48],[0.28,26],[0.72,22],[0.84,48],[0.95,14]];
-
 const layer = document.getElementById('icon-layer');
 const SZ=32, REPEL=130, FORCE=6, FRIC=0.88, SPRING=0.05;
 let particles = [];
 
-function buildParticles(){
+function buildParticles() {
   layer.innerHTML = ''; particles = [];
-  const wm  = document.getElementById('wmSection');
-  const ci  = document.getElementById('cleoInner');
-  if(!wm||!ci) return;
+  const wm = document.getElementById('wmSection');
+  const ci = document.getElementById('cleoInner');
+  if (!wm||!ci) return;
   const wR  = wm.getBoundingClientRect();
   const cR  = ci.getBoundingClientRect();
-  const cCY = cR.top + cR.height*0.42;
-  ICON_POS.forEach(([xr,yo],i)=>{
-    const ox = wR.left + wR.width*xr;
+  const cCY = cR.top + cR.height * 0.42;
+  ICON_POS.forEach(([xr, yo], i) => {
+    const ox = wR.left + wR.width * xr;
     const oy = cCY + yo;
     const el = document.createElement('div');
     el.className = 'ficon';
     el.innerHTML = ICONS[i];
-    el.style.left  = (ox - SZ/2)+'px';
-    el.style.top   = (oy - SZ/2)+'px';
+    el.style.left    = (ox - SZ/2) + 'px';
+    el.style.top     = (oy - SZ/2) + 'px';
     el.style.opacity = '0.85';
     layer.appendChild(el);
-    particles.push({el, ox, oy, x:ox, y:oy, vx:0, vy:0});
+    particles.push({ el, ox, oy, x:ox, y:oy, vx:0, vy:0 });
   });
 }
 
-(function tickIcons(){
+(function tickIcons() {
   const cs = cleoSlide.getBoundingClientRect();
-  const cX = cs.left + cs.width/2;
-  const cY = cs.top  + cs.height*0.42;
-  particles.forEach(p=>{
-    const dx=p.x-cX, dy=p.y-cY, d=Math.hypot(dx,dy);
-    if(d<REPEL && d>1){ const f=(REPEL-d)/REPEL*FORCE; p.vx+=(dx/d)*f; p.vy+=(dy/d)*f; }
-    p.vx += (p.ox-p.x)*SPRING;
-    p.vy += (p.oy-p.y)*SPRING;
+  const cX = cs.left + cs.width  / 2;
+  const cY = cs.top  + cs.height * 0.42;
+  particles.forEach(p => {
+    const dx = p.x-cX, dy = p.y-cY, d = Math.hypot(dx, dy);
+    if (d < REPEL && d > 1) { const f = (REPEL-d)/REPEL*FORCE; p.vx += dx/d*f; p.vy += dy/d*f; }
+    p.vx += (p.ox - p.x) * SPRING;
+    p.vy += (p.oy - p.y) * SPRING;
     p.vx *= FRIC; p.vy *= FRIC;
     p.x  += p.vx; p.y  += p.vy;
-    p.el.style.left    = (p.x-SZ/2)+'px';
-    p.el.style.top     = (p.y-SZ/2)+'px';
-    const spd = Math.hypot(p.vx,p.vy);
-    p.el.style.opacity = Math.min(0.82 + spd*0.04, 1);
+    p.el.style.left    = (p.x - SZ/2) + 'px';
+    p.el.style.top     = (p.y - SZ/2) + 'px';
+    p.el.style.opacity = Math.min(0.82 + Math.hypot(p.vx, p.vy) * 0.04, 1);
   });
   requestAnimationFrame(tickIcons);
 })();
